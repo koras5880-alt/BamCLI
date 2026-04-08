@@ -1,9 +1,4 @@
-# Фикс политики выполнения
-if ((Get-ExecutionPolicy) -ne "Bypass") {
-    powershell -ExecutionPolicy Bypass -File $PSCommandPath
-    exit
-}
-
+@'
 Clear-Host
 $OutputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "SilentlyContinue"
@@ -270,11 +265,13 @@ Write-Host "[+] Cleaning up..." -ForegroundColor Cyan
 wevtutil.exe clear-log "Microsoft-Windows-PowerShell/Operational" -ErrorAction SilentlyContinue
 Set-Location "C:\"
 
-# Удаление папки C:\ss (раскомментируйте если нужно)
-# Remove-Item $utilsPath -Recurse -Force -ErrorAction SilentlyContinue
-
 # Очистка истории PowerShell
 $filePath = "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
 if (Test-Path $filePath) { Clear-Content -Path $filePath -Force -ErrorAction SilentlyContinue }
 
 Write-Host "[+] Script completed!" -ForegroundColor Green
+'@ | Out-File -FilePath "$env:TEMP\FSChecker_temp.ps1" -Encoding UTF8
+
+powershell -ExecutionPolicy Bypass -File "$env:TEMP\FSChecker_temp.ps1"
+
+Remove-Item "$env:TEMP\FSChecker_temp.ps1" -Force
